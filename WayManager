@@ -1,0 +1,500 @@
+WayManager = {}
+local lastDLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+local lastDYZLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+local lastXLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+local lastZLLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+local zplSpTb,dlSpTb,dyzlSpTb,xlSpTb,zllSpTb = {},{},{},{},{}
+local dlRowMaxTb,dlColumnLenTb,dyzlRowMaxTb,xlRowMaxTb,zllRowMaxTb = {},{},{},{},{}
+local ZPLRow,ZPLColumn = 6,8
+local DLRow,DLColumn = 6,24
+local X3LRow,X3LColumn = 6,24
+local x3lTb = {}
+local ZPLStepX,DLStepX,X3LStepX = 0,0,0
+local EvenType = nil
+local NewZPLFunc,NewDLFunc,NewX3LFunc = nil,nil,nil
+local Test_Left_1,Test_Left_2,Test_Left_3,Test_Right_1,Test_Right_2,Test_Right_3 = nil,nil,nil,nil,nil,nil
+local Test_Pic_1_1,Test_Pic_2_1,Test_Pic_3_1,Test_Pic_1_2,Test_Pic_2_2,Test_Pic_3_2 = nil,nil,nil,nil,nil,nil
+local Test_1,Test_2 = nil,nil
+function WayManager.Start(params,funcs,tests) 
+    lastDLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+    lastDYZLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+    lastXLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+    lastZLLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+    zplSpTb,dlSpTb,dyzlSpTb,xlSpTb,zllSpTb = {},{},{},{},{}
+    dlRowMaxTb,dlColumnLenTb,dyzlRowMaxTb,xlRowMaxTb,zllRowMaxTb = {},{},{},{},{}
+    DLRow,DLColumn = params.dlRow,params.dlColumn
+    X3LRow,X3LColumn = params.x3lRow,params.x3lColumn
+    ZPLRow,ZPLColumn = params.zplRow,params.zplColumn
+    ZPLStepX,DLStepX,X3LStepX = params.zplStepX,params.dlStepX,params.x3lStepX
+    EvenType = params.evenType
+    Test_Left_1,Test_Left_2,Test_Left_3,Test_Right_1,Test_Right_2,Test_Right_3 = tests.test_Left_1,tests.test_Left_2,tests.test_Left_3,tests.test_Right_1,tests.test_Right_2,tests.test_Right_3
+    Test_Pic_1_1,Test_Pic_2_1,Test_Pic_3_1,Test_Pic_1_2,Test_Pic_2_2,Test_Pic_3_2 = tests.test_Pic_1_1,tests.test_Pic_2_1,tests.test_Pic_3_1,tests.test_Pic_1_2,tests.test_Pic_2_2,tests.test_Pic_3_2
+    Test_1,Test_2 = tests.test_1,tests.test_2 
+    NewZPLFunc,NewDLFunc,NewX3LFunc = funcs.newZPLFunc,funcs.newDLFunc,funcs.newX3LFunc
+    x3lTb = {}
+    for i = 1,DLColumn do
+        dlRowMaxTb[i] = DLRow    
+    end
+    for i = 1,X3LColumn do
+        dyzlRowMaxTb[i] = X3LRow    
+    end
+    for i = 1,X3LColumn do
+        xlRowMaxTb[i] = X3LRow    
+    end
+    for i = 1,X3LColumn do
+        zllRowMaxTb[i] = X3LRow    
+    end    
+end
+function WayManager.Stop(isDestroy)
+    lastDLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+    lastDYZLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+    lastXLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}
+    lastZLLStep = {stepType = nil,stepIndex = 0,sp = nil,evenTxt = nil,evenStep = 0,column = 0,row = 0,referColumn = 0}    
+    x3lTb = {}
+    for _,sp in pairs(zplSpTb) do
+        sp:removeFromParent()               
+    end 
+    zplSpTb = {}
+    for _,tb in pairs(dlSpTb) do
+        for _,sp in pairs(tb) do
+            sp:removeFromParent()
+        end                
+    end 
+    dlSpTb = {}
+    for _,tb in pairs(dyzlSpTb) do
+        for _,sp in pairs(tb) do
+            sp:removeFromParent()
+        end                
+    end 
+    dyzlSpTb = {}
+    for _,tb in pairs(xlSpTb) do
+        for _,sp in pairs(tb) do
+            sp:removeFromParent()
+        end                
+    end 
+    xlSpTb = {}
+    for _,tb in pairs(zllSpTb) do
+        for _,sp in pairs(tb) do
+            sp:removeFromParent()
+        end                
+    end
+    zllSpTb = {}  
+    if isDestroy then
+        dlRowMaxTb,dlColumnLenTb,dyzlRowMaxTb,xlRowMaxTb,zllRowMaxTb = {},{},{},{},{}
+        DLRow,DLColumn = 0,0
+        X3LRow,X3LColumn = 0,0
+        ZPLRow,ZPLColumn = 0,0
+        ZPLStepX,DLStepX,X3LStepX = 0,0,0
+        EvenType = nil
+        NewZPLFunc,NewDLFunc,NewX3LFunc = nil,nil,nil
+        Test_Left_1,Test_Left_2,Test_Left_3,Test_Right_1,Test_Right_2,Test_Right_3 = nil,nil,nil,nil,nil,nil
+        Test_1,Test_2 = nil,nil
+        Test_Pic_1_1,Test_Pic_2_1,Test_Pic_3_1,Test_Pic_1_2,Test_Pic_2_2,Test_Pic_3_2 = nil,nil,nil,nil,nil,nil    
+    else
+        for i = 1,DLColumn do
+            dlRowMaxTb[i] = DLRow    
+        end
+        for i = 1,X3LColumn do
+            dyzlRowMaxTb[i] = X3LRow    
+        end
+        for i = 1,X3LColumn do
+            xlRowMaxTb[i] = X3LRow    
+        end
+        for i = 1,X3LColumn do
+            zllRowMaxTb[i] = X3LRow    
+        end
+    end
+end
+local function ZPLStep(stepInfo)
+    local curPos = #zplSpTb
+    if curPos == ZPLRow * ZPLColumn then
+        curPos = ZPLRow * (ZPLColumn - 1)
+        for i = 1,ZPLRow do
+            local sp = table.remove(zplSpTb,1)
+            sp:removeFromParent()
+        end  
+        for _,sp in pairs(zplSpTb) do
+            sp:runAction(cc.MoveBy:create(0.5,cc.p(-ZPLStepX,0)))
+        end        
+    end
+    curPos = curPos + 1 
+    local row,column = 0,0
+    column = math.ceil(curPos / ZPLRow + 1) -2
+    row = curPos - column * ZPLRow - 1
+    local sp = NewZPLFunc(stepInfo,row,column)
+    table.insert(zplSpTb,sp)
+end
+local function DrawZPL(tb)
+    local start = #tb > ZPLRow * ZPLColumn and #tb - ZPLRow * ZPLColumn + 1 or 1
+    local stop = #tb
+    for i = start,stop do
+        ZPLStep(tb[i])
+    end 
+end
+local function DoStep(stepType,evenType,rowMax,columnMax,rowMaxTb,lastStep,spTb,stepX)
+    if stepType == nil then
+        return
+    end
+    local function NewEvenTxt(parent)
+        local txt = ccui.Text:create()                    
+        txt:setFontSize(18)
+        txt:setFontName(TTF.FZY4JW)
+        txt:setTextColor(cc.c4b(255,255,255,255))
+        local parentSize = parent:getContentSize()
+        txt:setPosition(cc.p(parentSize.width/2,parentSize.height/2))
+        parent:addChild(txt)
+        return txt
+    end
+    if stepType == evenType then
+        if lastStep.sp then
+            lastStep.evenStep = lastStep.evenStep + 1
+            if not lastStep.evenTxt then
+                lastStep.evenTxt = NewEvenTxt(lastStep.sp)                  
+            end
+            lastStep.evenTxt:setString(lastStep.evenStep)
+        end
+    else
+        lastStep.sp = nil
+        lastStep.evenTxt = nil
+        lastStep.evenStep = 0
+        local newRow,newColumn = 0,0
+        if stepType == lastStep.stepType then
+            lastStep.stepIndex = lastStep.stepIndex + 1 
+            local _rowMax = rowMaxTb[lastStep.referColumn] or rowMax            
+            if lastStep.row < _rowMax then
+                newRow,newColumn = lastStep.row + 1,lastStep.column   
+            else
+                newRow,newColumn = _rowMax,lastStep.column + 1
+                rowMaxTb[newColumn] = _rowMax - 1  
+            end
+        else
+            lastStep.stepIndex = 1
+            lastStep.stepType = stepType
+            newRow,newColumn = 1,lastStep.referColumn + 1            
+            if lastStep.row == 1 then
+                newColumn = lastStep.column + 1               
+            end
+            lastStep.referColumn = newColumn
+        end
+        if newColumn > columnMax then
+            local tb = table.remove(spTb,1) or {}
+            for _,sp in pairs(tb) do
+                sp:removeFromParent()
+            end                    
+            for _,tb in pairs(spTb) do
+                for _,sp in pairs(tb) do
+                    sp:runAction(cc.MoveBy:create(0.5,cc.p(-stepX,0)))
+                end   
+            end 
+            table.remove(rowMaxTb)
+            newColumn = columnMax
+            lastStep.referColumn = lastStep.referColumn - 1
+        end
+        lastStep.row = newRow
+        lastStep.column = newColumn
+        --cclog("newRow:"..newRow.."---newColumn:"..newColumn)
+    end
+end
+local function DLStep(stepType)
+    DoStep(stepType,EvenType,DLRow,DLColumn,dlRowMaxTb,lastDLStep,dlSpTb,DLStepX)
+    if not lastDLStep.sp and lastDLStep.stepType then
+        local sp = NewDLFunc(lastDLStep.stepType,lastDLStep.row-1,lastDLStep.column-1)
+        lastDLStep.sp = sp
+        if lastDLStep.stepIndex == 1 then
+            table.insert(dlColumnLenTb,1) 
+            if #dlColumnLenTb >= X3LColumn then
+                local len = table.remove(dlColumnLenTb,1)
+                for i = 1,len do
+                    local x3l = table.remove(x3lTb,1)
+                end
+                for _,x3l in pairs(x3lTb) do
+                    x3l.column = x3l.column - 1
+                end                        
+            end  
+            table.insert(dlSpTb,{lastDLStep.sp})
+        else
+            dlColumnLenTb[#dlColumnLenTb] = dlColumnLenTb[#dlColumnLenTb] + 1  
+            local tb = dlSpTb[#dlSpTb]
+            table.insert(tb,lastDLStep.sp)
+        end
+        table.insert(x3lTb,{column = #dlColumnLenTb,index = lastDLStep.stepIndex,isNew = lastDLStep.stepIndex == 1})
+    end
+end
+local function GetMinIndex(tb,rowMax,columnMax,evenType)
+    local lastStepType = nil
+    local result = {}
+    local cnt,totalCnt,tmpCnt = 0,0,0
+    for i = 1,#tb do
+        local stepType = type(tb[i]) == 'table' and tb[i].RType or tb[i]
+        if stepType == evenType then
+            if lastStepType then
+                totalCnt =  totalCnt + 1
+            else
+                tmpCnt = tmpCnt+1       
+            end             
+        else            
+            if  stepType~= lastStepType then                     
+                lastStepType = stepType
+                cnt = 1
+                totalCnt = 1
+                table.insert(result,{cnt = cnt,totalCnt = totalCnt}) 
+            else
+                cnt = cnt + 1
+                totalCnt =  totalCnt + 1
+                local sResult = result[#result]
+                sResult.cnt = cnt
+                sResult.totalCnt = totalCnt
+            end            
+        end 
+    end 
+    local minColumn = #result > columnMax and (#result - columnMax + 1) or 1
+    local function MinIndex(pos)
+        local column = 0
+        local columnMaxTb = {}
+        local minColumn = pos
+        for i = pos,#result do
+            column = column + 1
+            if column > columnMax then  --这种情况其实在上面已经被控制了
+                return MinIndex(minColumn + 1)    
+            end
+            local rr = result[i]
+            local len = rr.cnt
+            local maxRow = columnMaxTb[column] or rowMax
+            if len > rowMax + columnMax - 1 then
+                return MinIndex(minColumn + 1)
+            else
+                if len > maxRow + columnMax - column then
+                    return MinIndex(minColumn + len - (maxRow + columnMax - column))                              
+                else
+                    if len > maxRow then
+                        if maxRow > 1 then
+                            for j = 1,len - maxRow do
+                                columnMaxTb[column+j] = maxRow - 1    
+                            end  
+                        else
+                            column = column + len - 1
+                        end  
+                    end               
+                end
+            end
+        end 
+        return minColumn
+    end
+    local last = result[#result]
+    local lastCnt = last and last.totalCnt or 0
+    if lastCnt >= columnMax + rowMax - 1 then
+        minColumn = #result
+        tmpCnt = tmpCnt + lastCnt - (columnMax + rowMax - 1)
+    else
+        minColumn = MinIndex(minColumn)    
+    end        
+    local index = tmpCnt
+    for i = 1,minColumn-1 do
+        index = index + result[i].totalCnt    
+    end  
+    return index + 1
+end
+local function DrawDL(tb)
+    for i = GetMinIndex(tb,DLRow,DLColumn,EvenType),#tb do
+        DLStep(tb[i].RType)
+    end    
+end
+local function DrawX3L(x3lType,stepType)
+    local x3lStep = nil
+    local x3lRowMaxTb = nil
+    local x3lSpTb = nil
+    if x3lType == 1 then  
+        x3lStep = lastDYZLStep
+        x3lSpTb = dyzlSpTb
+        x3lRowMaxTb = dyzlRowMaxTb
+    elseif x3lType == 2 then
+        x3lStep = lastXLStep
+        x3lSpTb = xlSpTb
+        x3lRowMaxTb = xlRowMaxTb
+    elseif x3lType == 3 then
+        x3lStep = lastZLLStep
+        x3lSpTb = zllSpTb
+        x3lRowMaxTb = zllRowMaxTb
+    end
+    local lastStepType = x3lStep.stepType
+    DoStep(stepType,nil,X3LRow,X3LColumn,x3lRowMaxTb,x3lStep,x3lSpTb,X3LStepX)
+    local sp = NewX3LFunc(x3lType,x3lStep.stepType,x3lStep.row-1,x3lStep.column-1)
+    x3lStep.sp = sp
+    if stepType == lastStepType then
+        local tb = x3lSpTb[#x3lSpTb] 
+        table.insert(tb,x3lStep.sp)
+    else
+        table.insert(x3lSpTb,{x3lStep.sp})
+    end
+end
+local function GetX3LType(x3lType,x3l)
+    local result = nil
+    local pre1ColumnLen,pre2ColumnLen,pre3ColumnLen,pre4ColumnLen,curColumnLen = dlColumnLenTb[x3l.column-1],dlColumnLenTb[x3l.column-2],dlColumnLenTb[x3l.column-3],dlColumnLenTb[x3l.column-4],dlColumnLenTb[x3l.column]
+    if x3lType == 1 then
+        if x3l.isNew == true then                            
+            if x3l.column >= 3 then
+                result = pre1ColumnLen == pre2ColumnLen
+            end                
+        else            
+            if x3l.column >= 2 then
+                result = x3l.index ~= pre1ColumnLen + 1
+            end                    
+        end 
+    elseif x3lType == 2 then
+        if x3l.isNew then
+            if x3l.column >= 4 then
+                result = pre1ColumnLen == pre3ColumnLen
+            end                
+        else
+            if x3l.column >= 3 then
+                result = x3l.index ~= pre2ColumnLen + 1
+            end                   
+        end
+    elseif x3lType == 3 then
+        if x3l.isNew then
+            if x3l.column >= 5 then
+                result = pre1ColumnLen == pre4ColumnLen
+            end                
+        else
+            if x3l.column >= 4 then
+                result = x3l.index ~= pre3ColumnLen + 1
+            end                    
+        end        
+    end
+    return result
+end
+local function DrawDYZL()
+    local dyzlInfo = {}
+    for _,x3l in pairs(x3lTb) do
+        local result = GetX3LType(1,x3l)
+        if result ~= nil then
+            table.insert(dyzlInfo,result)
+        end        
+    end
+    for i = GetMinIndex(dyzlInfo,X3LRow,X3LColumn),#dyzlInfo do
+        DrawX3L(1,dyzlInfo[i])
+    end
+end
+local function DrawXL()
+    local xlInfo = {}
+    for _,x3l in pairs(x3lTb) do
+        local result = GetX3LType(2,x3l)
+        if result ~= nil then
+            table.insert(xlInfo,result)
+        end 
+    end
+    for i = GetMinIndex(xlInfo,X3LRow,X3LColumn),#xlInfo do
+        DrawX3L(2,xlInfo[i])
+    end       
+end
+local function DrawZLL()
+    local zllInfo = {}
+    for _,x3l in pairs(x3lTb) do
+        local result = GetX3LType(3,x3l)
+        if result ~= nil then
+            table.insert(zllInfo,result)
+        end 
+    end
+    for i = GetMinIndex(zllInfo,X3LRow,X3LColumn),#zllInfo do
+        DrawX3L(3,zllInfo[i])
+    end        
+end
+local function TestX3L() 
+    local function Test(stepType)
+        local lenCnt = #dlColumnLenTb
+        local lastX3L = x3lTb[#x3lTb]
+        local pre1ColumnLen,pre2ColumnLen,pre3ColumnLen,pre4ColumnLen,curColumnLen = dlColumnLenTb[lenCnt-1],dlColumnLenTb[lenCnt-2],dlColumnLenTb[lenCnt-3],dlColumnLenTb[lenCnt-4],dlColumnLenTb[lenCnt]
+        local picName1,picName2,picName3 = nil,nil,nil
+        if stepType == lastDLStep.stepType then
+            if pre1ColumnLen then
+                picName1 = (lastX3L.index + 1 ~= pre1ColumnLen + 1) and Test_Pic_1_1 or Test_Pic_1_2                
+            end 
+            if pre2ColumnLen then
+                picName2 = (lastX3L.index + 1 ~= pre2ColumnLen + 1) and Test_Pic_2_1 or Test_Pic_2_2 
+            end
+            if pre3ColumnLen then
+                picName3 = (lastX3L.index + 1 ~= pre3ColumnLen + 1) and Test_Pic_3_1 or Test_Pic_3_2
+            end                                 
+        else
+            if pre1ColumnLen then
+                picName1 = (curColumnLen == pre1ColumnLen) and Test_Pic_1_1 or Test_Pic_1_2                
+            end 
+            if pre2ColumnLen then
+                picName2 = (curColumnLen == pre2ColumnLen) and Test_Pic_2_1 or Test_Pic_2_2 
+            end
+            if pre3ColumnLen then
+                picName3 = (curColumnLen == pre3ColumnLen) and Test_Pic_3_1 or Test_Pic_3_2
+            end                                                        
+        end 
+        return picName1,picName2,picName3
+    end
+    local picName1,picName2,picName3 = Test(Test_1)
+    if picName1 then
+        Test_Left_1:setVisible(true)
+        Test_Left_1:loadTexture(picName1,1) 
+    else
+        Test_Left_1:setVisible(false)    
+    end
+    if picName2 then
+        Test_Left_2:setVisible(true)
+        Test_Left_2:loadTexture(picName2,1)
+    else
+        Test_Left_2:setVisible(false)    
+    end
+    if picName3 then
+        Test_Left_3:setVisible(true)
+        Test_Left_3:loadTexture(picName3,1)  
+    else
+        Test_Left_3:setVisible(false)
+    end
+    picName1,picName2,picName3 = Test(Test_2)
+    if picName1 then
+        Test_Right_1:setVisible(true)
+        Test_Right_1:loadTexture(picName1,1) 
+    else
+        Test_Right_1:setVisible(false)    
+    end
+    if picName2 then
+        Test_Right_2:setVisible(true)
+        Test_Right_2:loadTexture(picName2,1)
+    else
+        Test_Right_2:setVisible(false)    
+    end
+    if picName3 then
+        Test_Right_3:setVisible(true)
+        Test_Right_3:loadTexture(picName3,1)  
+    else
+        Test_Right_3:setVisible(false)
+    end
+end
+function WayManager.Draw(tb)
+    DrawZPL(tb)
+    DrawDL(tb)
+    DrawDYZL()
+    DrawXL()
+    DrawZLL()
+    TestX3L()
+end
+function WayManager.Step(data)
+    ZPLStep(data)
+    local stepType = data.RType
+    DLStep(stepType)
+    if stepType ~= EvenType then
+        local lastX3L = x3lTb[#x3lTb]
+        local x3lType = nil
+        x3lType = GetX3LType(1,lastX3L)
+        if x3lType ~= nil then
+            DrawX3L(1,x3lType)    
+        end
+        x3lType = GetX3LType(2,lastX3L)
+        if x3lType ~= nil then
+            DrawX3L(2,x3lType)    
+        end
+        x3lType = GetX3LType(3,lastX3L)
+        if x3lType ~= nil then
+            DrawX3L(3,x3lType)    
+        end
+        TestX3L()
+    end
+end
+
